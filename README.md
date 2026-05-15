@@ -1,18 +1,24 @@
-# RMBL SDP — Dataset Issue Tracker
+# RMBL SDP — Data Products
 
-This repository is **not for code bugs**. It exists solely to track
-issues with the **data products** in the RMBL Spatial Data Platform
-(SDP) — incorrect values, missing dates, metadata errors, acquisition
-gaps, documentation problems, and so on. Code issues with the `rSDP` /
-`pySDP` packages or the SDP Browser belong in their respective
-repositories.
+This repository serves two purposes for the **RMBL Spatial Data Platform**:
 
-## Filing an issue
+1. **Issue tracking** for SDP **datasets** — incorrect values, missing
+   dates, metadata errors, acquisition gaps, documentation problems.
+   File via the structured **Dataset issue** form.
+2. **Source code** for derived SDP data products (planned). As products
+   that have a reproducible processing pipeline are migrated here, their
+   code will live under `products/<CatalogID>/`.
 
-Click **New issue → Dataset issue**, then fill out the structured form.
-The most important field is the **CatalogID** (the 6-character SDP code
-like `R3D009` or `BM012`). A validation bot will comment if the ID
-isn't recognized.
+> Bugs and feature requests for the `rSDP` / `pySDP` client packages or
+> the SDP Browser viewer belong in their respective repositories. This
+> repo is for the **data**, not the clients.
+
+## Filing a dataset issue
+
+Click **New issue → Dataset issue** and fill out the structured form.
+The most important field is the **CatalogID** (the 6-character SDP
+code like `R3D009` or `BM012`). A validation bot will comment if the
+ID isn't recognized.
 
 You can find a dataset's CatalogID by:
 
@@ -22,8 +28,8 @@ You can find a dataset's CatalogID by:
 - Inspecting the STAC catalog at
   <https://radiantearth.github.io/stac-browser/#/external/rmbl-sdp.s3.us-east-2.amazonaws.com/stac/v1/catalog.json>
 
-You can also file an issue directly for the dataset you have open in
-rSDP with:
+You can also file an issue directly from R or Python for the dataset
+you have open:
 
 ```r
 rSDP::sdp_report_issue("R3D009")          # opens the prefilled form
@@ -33,14 +39,13 @@ rSDP::sdp_report_issue("R3D009")          # opens the prefilled form
 
 1. **Auto-labels** are applied within a minute — `product:<CATID>`,
    `type:<...>`, `severity:<...>`, and `status:triage`.
-2. A maintainer reviews the issue and either confirms it
+2. A maintainer reviews and either confirms it
    (`status:investigating`), asks for more information
    (`status:needs-info`), declines to fix it (`status:wontfix`), or
    immediately resolves it.
-3. The STAC catalog's collection-level
-   `rmbl:open_issues_count` updates within ~30 seconds of any label
-   or state change, so other users see the issue count on the affected
-   dataset.
+3. The STAC catalog's collection-level `rmbl:open_issues_count` updates
+   within ~30 seconds of any label or state change, so other users see
+   the issue count on the affected dataset.
 4. When the issue is fixed, the closing comment links the commit (or
    data update) that resolved it.
 
@@ -59,9 +64,18 @@ rSDP::sdp_report_issue("R3D009")          # opens the prefilled form
   issues for a CatalogID (cached for an hour).
 - `rSDP::sdp_get_catalog(with_issue_counts = TRUE)` adds an
   `OpenIssues` column to catalog results.
-- `rSDP::sdp_browse()` shows a `⚠ N issues` badge on affected cards.
-- The static STAC catalog carries an `rmbl:open_issues_count` field
-  and a `report-issue` rel link on each collection.
+- `rSDP::sdp_browse(with_issue_counts = TRUE)` shows a `⚠ N issues`
+  badge on affected cards.
+- The static STAC catalog carries `rmbl:open_issues_count` and a
+  `report-issue` rel link on each collection.
+
+## Product source code (planned)
+
+Where it makes sense to publish the processing pipeline for a derived
+SDP product, code will land under `products/<CatalogID>/`. The repo's
+issue tracker will then double as the bug tracker for that product's
+code — issues filed against a product whose source lives here can be
+fixed in the same place.
 
 ## Reporting issues without a GitHub account
 
@@ -70,4 +84,5 @@ form (`rmbl.org/sdp/report-issue/`) is on the roadmap.
 
 ## License
 
-Issue metadata is published under CC-BY-4.0 like the rest of the SDP.
+Issue metadata and any source code in this repo are published under
+CC-BY-4.0 / MIT respectively (see `LICENSE` once code lands).

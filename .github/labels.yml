@@ -1,4 +1,4 @@
-# Label scheme for rmbl-sdp/sdp-issues.
+# Label scheme for rmbl-sdp/sdp-products.
 #
 # Apply with: gh label create --file .github/labels.yml  (or sync via an
 # action). Per-product labels (product:R3D009, product:BM012, ...) are
