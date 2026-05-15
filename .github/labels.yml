@@ -1,0 +1,55 @@
+# Label scheme for rmbl-sdp/sdp-issues.
+#
+# Apply with: gh label create --file .github/labels.yml  (or sync via an
+# action). Per-product labels (product:R3D009, product:BM012, ...) are
+# created on demand by the validate-and-label workflow when an issue is
+# filed for that CatalogID, so they aren't listed here.
+
+# Status — issue lifecycle
+- name: "status:triage"
+  color: "fbca04"
+  description: "New issue, not yet reviewed."
+- name: "status:investigating"
+  color: "1d76db"
+  description: "Confirmed and being investigated."
+- name: "status:fixed"
+  color: "0e8a16"
+  description: "Resolved in the dataset; see closing comment for the fix."
+- name: "status:wontfix"
+  color: "ffffff"
+  description: "Won't be addressed (with reason in the closing comment)."
+- name: "status:needs-info"
+  color: "d4c5f9"
+  description: "Awaiting clarification from the reporter."
+
+# Issue type — what kind of problem
+- name: "type:incorrect-values"
+  color: "d93f0b"
+- name: "type:missing-dates"
+  color: "d93f0b"
+- name: "type:metadata-error"
+  color: "d93f0b"
+- name: "type:acquisition-gap"
+  color: "d93f0b"
+- name: "type:documentation"
+  color: "d93f0b"
+- name: "type:other"
+  color: "d93f0b"
+
+# Severity
+- name: "severity:critical"
+  color: "b60205"
+- name: "severity:high"
+  color: "d93f0b"
+- name: "severity:medium"
+  color: "fbca04"
+- name: "severity:low"
+  color: "c2e0c6"
+
+# Misc
+- name: "needs-info"
+  color: "d4c5f9"
+  description: "More information needed before triage can proceed."
+- name: "reporter:anonymous"
+  color: "bfd4f2"
+  description: "Filed via the no-auth intake form (when Phase 2 ships)."

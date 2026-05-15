@@ -1,0 +1,76 @@
+name: Validate and label dataset issue
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate CatalogID and apply labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            if (!issue || !issue.body) return;
+
+            // Parse Issue Form fields from the rendered markdown body.
+            // GitHub Issue Forms emit "### Field name\n\n<value>" blocks.
+            function fieldValue(body, label) {
+              const re = new RegExp("### " + label + "\\s*\\n+([^\\n]+)", "m");
+              const m = body.match(re);
+              if (!m) return null;
+              const v = m[1].trim();
+              return v === "_No response_" ? null : v;
+            }
+
+            const catalogId = fieldValue(issue.body, "Catalog ID");
+            const issueType = fieldValue(issue.body, "Issue type");
+            const severity = fieldValue(issue.body, "Severity");
+
+            const labelsToAdd = [];
+            if (issueType) labelsToAdd.push(`type:${issueType}`);
+            if (severity) labelsToAdd.push(`severity:${severity}`);
+
+            // Validate CatalogID against the canonical CSV.
+            let known = false;
+            if (catalogId) {
+              const csvUrl = "https://rmbl-sdp.s3.us-east-2.amazonaws.com/data_products/SDP_product_table_05_15_2026.csv";
+              const resp = await fetch(csvUrl);
+              const text = await resp.text();
+              const ids = text.split("\n").slice(1).map(l => l.split(",")[0]);
+              known = ids.includes(catalogId);
+              if (known) labelsToAdd.push(`product:${catalogId}`);
+            }
+
+            if (labelsToAdd.length) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: labelsToAdd,
+              });
+            }
+
+            if (catalogId && !known) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ["needs-info"],
+              });
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: [
+                  `Hi @${issue.user.login}, the CatalogID \`${catalogId}\` isn't in the current SDP product catalog.`,
+                  ``,
+                  `If you have a typo, please edit the issue with the correct 6-character code (e.g. \`R3D009\`, \`BM012\`). You can find valid CatalogIDs at <https://sdpbrowser.org/> or via \`rSDP::sdp_get_catalog()\`. If you think the dataset *should* exist, leave this issue open and we'll investigate.`,
+                ].join("\n"),
+              });
+            }

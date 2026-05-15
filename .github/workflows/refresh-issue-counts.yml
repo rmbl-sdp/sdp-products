@@ -1,0 +1,61 @@
+name: Refresh STAC issue counts
+
+# Patches `rmbl:open_issues_count` on STAC collection.json files in S3.
+# Event-driven on issue label/state changes; nightly fallback in case a
+# webhook is missed. Never touches item JSONs.
+
+on:
+  issues:
+    types: [opened, closed, reopened, labeled, unlabeled, edited]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * *"  # 09:00 UTC daily
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out rSDP (for refresh script)
+        uses: actions/checkout@v4
+        with:
+          repository: rmbl-sdp/rSDP
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      - name: Download collection.json files from S3
+        run: |
+          mkdir -p stac-tree
+          aws s3 sync s3://rmbl-sdp/stac/v1/ stac-tree/ \
+            --exclude "*" --include "*/collection.json"
+
+      - name: Patch open_issues_count in collection.json files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUES_REPO: ${{ github.repository }}
+        run: |
+          python stac-gen/refresh_issue_counts.py \
+            --stac-dir stac-tree \
+            --issues-repo "$ISSUES_REPO"
+
+      - name: Sync changed collection.json back to S3
+        run: |
+          aws s3 sync stac-tree/ s3://rmbl-sdp/stac/v1/ \
+            --exclude "*" --include "*/collection.json" \
+            --acl public-read

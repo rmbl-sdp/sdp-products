@@ -1,0 +1,116 @@
+name: Dataset issue
+description: Report a problem with a specific RMBL SDP data product.
+title: "[<CatalogID>]: <short summary>"
+labels:
+  - "status:triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to flag an issue with an RMBL Spatial Data
+        Platform (SDP) dataset! Filling out every field below makes it much
+        easier for us to reproduce and fix the problem.
+
+        If you're not sure which dataset is affected, browse the catalog at
+        [sdpbrowser.org](https://sdpbrowser.org/) or via `rSDP::sdp_browse()`.
+
+  - type: input
+    id: catalog_id
+    attributes:
+      label: Catalog ID
+      description: |
+        The 6-character SDP CatalogID for the affected dataset (e.g. `R3D009`,
+        `BM012`, `R6D001`). A validation bot will comment if the ID isn't
+        recognized.
+      placeholder: R4D001
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: Issue type
+      description: What kind of problem is this?
+      options:
+        - incorrect-values
+        - missing-dates
+        - metadata-error
+        - acquisition-gap
+        - documentation
+        - other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: |
+        - **critical**: dataset is unusable or scientifically misleading
+        - **high**: substantial defect affecting a significant subset of users
+        - **medium**: noticeable defect with reasonable workarounds
+        - **low**: cosmetic, documentation, or edge-case
+      options:
+        - critical
+        - high
+        - medium
+        - low
+    validations:
+      required: true
+
+  - type: input
+    id: spatial_extent
+    attributes:
+      label: Spatial extent affected (optional)
+      description: |
+        Coordinates (lon/lat bbox or polygon WKT) or a placename. Helps us
+        scope the fix.
+      placeholder: "e.g. -107.05,38.95,-106.95,39.05  or  'around Gothic townsite'"
+
+  - type: input
+    id: temporal_extent
+    attributes:
+      label: Temporal extent affected (optional)
+      description: Date range, single date, or "all dates". For time-series products.
+      placeholder: "e.g. 2021-06-01 to 2021-08-31  or  2018"
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: What you observed
+      description: Describe what looks wrong. Screenshots, plots, or values are very welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: What did you expect to see instead, and why?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: |
+        A minimal code snippet (R, Python, or QGIS workflow) that surfaces the
+        problem. For rSDP/pySDP, paste the call you used.
+      render: shell
+
+  - type: input
+    id: contact
+    attributes:
+      label: Contact email (optional)
+      description: |
+        If you'd like a follow-up question privately, leave an email. We won't
+        display it on the public issue thread.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Acknowledgment
+      options:
+        - label: I have searched [existing issues](https://github.com/rmbl-sdp/sdp-issues/issues?q=is%3Aissue) and this is not a duplicate.
+          required: true
